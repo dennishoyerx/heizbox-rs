@@ -70,18 +70,6 @@
 
 ---
 
-### Epic HAL-E2 · Pin-Konflikte auflösen
-> Drei bekannte GPIO-Konflikte müssen hardware- oder softwareseitig gelöst werden, bevor die Firmware auf echter Hardware lauffähig ist.
-
-| ID | Aufgabe | Priorität | Status | Typen / Referenzen |
-|---|---|---|---|---|
-| HAL-T5 | GPIO 2: Entscheidung treffen — Joystick RIGHT oder Status LED. Pin-Konstante in `pins.rs` korrigieren und Konflikt dokumentieren | 🔴 kritisch | ⬜ | `pins.rs`, `JOYSTICK_RIGHT_PIN`, `STATUS_LED_PIN` |
-| HAL-T6 | GPIO 25: Entscheidung treffen — PCF8574 INT oder Speaker. Alternativ: Software-Multiplexing per Interrupt-Flag | 🔴 kritisch | ⬜ | `pins.rs`, `PCF8574_INT_PIN`, `SPEAKER_PIN` |
-| HAL-T7 | GPIO 18 (SCK): Shared-Bus-Nutzung für Display + Thermocouple durch korrekte CS-Steuerung absichern | 🟠 hoch | ⬜ | `pins.rs`, `SpiDriver`, `DISPLAY_SCK_PIN` |
-| HAL-T8 | Alle Pin-Konstanten in `pins.rs` mit Hardware-Schaltplan abgleichen und finalisieren | 🟠 hoch | ⬜ | `pins.rs` |
-
----
-
 ## APP — heizbox-app
 
 ### Epic APP-E1 · Screen-Rendering implementieren
@@ -293,4 +281,4 @@
 | **Gesamt** | **27** | **32** | **22** | **11** | **92** |
 
 > **Kritischer Pfad für erste Hardware-Inbetriebnahme:**  
-> HAL-T5 → HAL-T6 → ESP32-T1 → ESP32-T5 → ESP32-T6 → ESP32-T9 → ESP32-T10 → ESP32-T13 → ESP32-T15 → APP-T11 → APP-T12 → APP-T13 → ESP32-T20 → ESP32-T21 → ESP32-T22 → ESP32-T23
+> ESP32-T1 → ESP32-T5 → ESP32-T6 → ESP32-T9 → ESP32-T10 → ESP32-T13 → ESP32-T15 → APP-T11 → APP-T12 → APP-T13 → ESP32-T20 → ESP32-T21 → ESP32-T22 → ESP32-T23

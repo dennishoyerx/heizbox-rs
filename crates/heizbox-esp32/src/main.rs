@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
     // ── Initialise HAL drivers ─────────────────────────────────────────────
     let nvs = hal_impl::NvsImpl::new()?;
     let gpio = hal_impl::GpioImpl::new();
-    let i2c = hal_impl::I2cImpl::new();
+    let i2c = hal_impl::I2cImpl::new()?;
     let spi = hal_impl::SpiImpl::new();
     let wifi = hal_impl::WifiImpl::new();
     let adc = hal_impl::AdcImpl::new();
