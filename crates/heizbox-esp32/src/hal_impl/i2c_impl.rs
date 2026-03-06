@@ -1,52 +1,44 @@
+use esp_idf_hal::gpio::{Pin, InputPin, OutputPin};
 use esp_idf_hal::i2c::{I2cDriver as EspI2cDriver, config::Config};
-use esp_idf_hal::peripherals::Peripherals;
-use esp_idf_hal::delay::BLOCK;
-use esp_idf_hal::units::Hertz;
+use esp_idf_hal::i2c::I2C0;
 use heizbox_hal::{I2cDriver, I2cError};
 
-/// ESP32 I2C driver using `esp-idf-hal`.
+/// ESP32 I2C driver using `esp_idf_hal`.
 ///
 /// Pin configuration (from hardware spec):
-/// - SCL: GPIO 27
 /// - SDA: GPIO 26
+/// - SCL: GPIO 27
 /// - Frequency: 100 kHz
 pub struct I2cImpl {
     driver: EspI2cDriver<'static>,
 }
 
 impl I2cImpl {
-    pub fn new() -> Result<Self, I2cError> {
-        let peripherals = Peripherals::take().map_err(|_| I2cError::BusError)?;
-
-        // Configure I2C pins: SDA=26, SCL=27, 100 kHz
-        let sda = peripherals.pins.gpio26;
-        let scl = peripherals.pins.gpio27;
-
-        let config = Config::new().baudrate(Hertz(100_000));
-        let driver = EspI2cDriver::new(peripherals.i2c0, sda, scl, &config)
+    /// Create a new I2C driver.
+    /// Takes ownership of the I2C0 peripheral and the SDA/SCL pins.
+    pub fn new<T1: Pin + InputPin + OutputPin, T2: Pin + InputPin + OutputPin>(
+        i2c0: I2C0,
+        sda: T1,
+        scl: T2,
+    ) -> Result<Self, I2cError> {
+        let config = Config::new().baudrate(esp_idf_hal::units::Hertz(100_000));
+        let driver = EspI2cDriver::new(i2c0, sda, scl, &config)
             .map_err(|_| I2cError::BusError)?;
-
         Ok(Self { driver })
-    }
-}
-
-impl Default for I2cImpl {
-    fn default() -> Self {
-        Self::new().expect("I2C initialization failed")
     }
 }
 
 impl I2cDriver for I2cImpl {
     fn write(&mut self, addr: u8, data: &[u8]) -> Result<(), I2cError> {
         self.driver
-            .write(addr, data, BLOCK)
+            .write(addr, data, esp_idf_hal::delay::BLOCK)
             .map_err(|_| I2cError::BusError)
     }
 
     fn read(&mut self, addr: u8, len: usize) -> Result<Vec<u8>, I2cError> {
         let mut buffer = vec![0u8; len];
         self.driver
-            .read(addr, &mut buffer, BLOCK)
+            .read(addr, &mut buffer, esp_idf_hal::delay::BLOCK)
             .map_err(|_| I2cError::BusError)?;
         Ok(buffer)
     }
@@ -59,7 +51,7 @@ impl I2cDriver for I2cImpl {
     ) -> Result<Vec<u8>, I2cError> {
         let mut buffer = vec![0u8; read_len];
         self.driver
-            .write_read(addr, write, &mut buffer, BLOCK)
+            .write_read(addr, write, &mut buffer, esp_idf_hal::delay::BLOCK)
             .map_err(|_| I2cError::BusError)?;
         Ok(buffer)
     }

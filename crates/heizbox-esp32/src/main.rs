@@ -9,6 +9,7 @@ mod hal_impl;
 use heizbox_app::device::DeviceApp;
 use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver};
 use heizbox_infra::clock::ClockManager;
+use esp_idf_hal::peripherals::Peripherals;
 
 fn main() -> anyhow::Result<()> {
     // Required by esp-idf-svc.
@@ -17,13 +18,23 @@ fn main() -> anyhow::Result<()> {
 
     info!("Heizbox starting — device_id={}", config::DEVICE_ID);
 
+    // ── Take ESP32 peripherals (once) ────────────────────────────────────────
+    let peripherals = Peripherals::take().map_err(|_| anyhow::anyhow!("Failed to take peripherals"))?;
+    let i2c0 = peripherals.i2c0;
+    // Extract the GPIO pins needed for I2C (moving them out of peripherals)
+    let sda = peripherals.pins.gpio26;
+    let scl = peripherals.pins.gpio27;
+
     // ── Initialise HAL drivers ─────────────────────────────────────────────
-    let nvs = hal_impl::NvsImpl::new()?;
-    let gpio = hal_impl::GpioImpl::new();
-    let i2c = hal_impl::I2cImpl::new()?;
+    let gpio = hal_impl::GpioImpl::new()?;
+    // I2C: SDA=GPIO26, SCL=GPIO27
+    let i2c = hal_impl::I2cImpl::new(i2c0, sda, scl)?;
+    // SPI: currently stub
     let spi = hal_impl::SpiImpl::new();
     let wifi = hal_impl::WifiImpl::new();
     let adc = hal_impl::AdcImpl::new();
+    // NVS: may need adjustment later; stub for now
+    let nvs = hal_impl::NvsImpl::new()?;
 
     // ── Application ───────────────────────────────────────────────────────
     let app = DeviceApp::new();
