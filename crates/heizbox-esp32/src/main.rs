@@ -1,5 +1,5 @@
 use esp_idf_svc::sys::link_patches;
-use log::info;
+use log::{info, warn};
 use std::{thread, time::Duration};
 
 mod config;
@@ -7,8 +7,8 @@ mod error;
 mod hal_impl;
 
 use heizbox_app::device::DeviceApp;
-use heizbox_core::input::InputEvent;
 use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver};
+use heizbox_infra::clock::ClockManager;
 
 fn main() -> anyhow::Result<()> {
     // Required by esp-idf-svc.
@@ -74,8 +74,49 @@ fn control_task() {
 
 fn network_task() {
     info!("[network] task started");
+
+    // Initialize WiFi driver and ClockManager
+    let mut wifi = hal_impl::WifiImpl::new();
+    let mut clock = ClockManager::new();
+
+    // WiFi credentials (should be sourced from config or NVS in production)
+    let ssid = "your-ssid";
+    let password = "your-password";
+
     loop {
-        // TODO: maintain WebSocket, send heartbeats, handle OTA
+        if !wifi.is_connected() {
+            // Attempt to connect
+            info!("Connecting to WiFi...");
+            match wifi.connect(ssid, password) {
+                Ok(()) => {
+                    info!("WiFi connected");
+                    // After successful connection, synchronize NTP clock
+                    match clock.sync_ntp() {
+                        Ok(()) => {
+                            info!("NTP synchronized, current UTC time: {}", clock.now_unix());
+                        }
+                        Err(e) => {
+                            warn!("NTP synchronization failed: {}", e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    warn!("WiFi connection failed: {:?}", e);
+                }
+            }
+        } else {
+            // Already connected: if clock not synced, try again periodically
+            if !clock.is_synced() {
+                if let Err(e) = clock.sync_ntp() {
+                    warn!("NTP retry failed: {}", e);
+                } else {
+                    info!("NTP synchronized on retry, current UTC time: {}", clock.now_unix());
+                }
+            }
+        }
+
+        // Additional network maintenance (WebSocket, heartbeats, OTA checks) would go here.
+
         thread::sleep(Duration::from_secs(1));
     }
 }

@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -24,10 +23,9 @@ impl core::fmt::Display for IpAddr {
     }
 }
 
-#[async_trait]
 pub trait WifiDriver: Send + Sync {
-    async fn connect(&mut self, ssid: &str, password: &str) -> Result<(), WifiError>;
-    async fn disconnect(&mut self) -> Result<(), WifiError>;
+    fn connect(&mut self, ssid: &str, password: &str) -> Result<(), WifiError>;
+    fn disconnect(&mut self) -> Result<(), WifiError>;
     fn is_connected(&self) -> bool;
     fn get_ip(&self) -> Option<IpAddr>;
     /// Signal strength in dBm.

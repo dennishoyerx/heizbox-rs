@@ -174,7 +174,7 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| INFRA-T16 | `ClockManager::sync_ntp()` mit `EspSntp` implementieren; nach WLAN-Connect aufrufen | 🟠 hoch | ⬜ | `ClockManager`, `WifiDriver`, `NTP_SERVER`, `DomainEvent::WifiConnected` |
+| INFRA-T16 | `ClockManager::sync_ntp()` mit `EspSntp` implementieren; nach WLAN-Connect aufrufen | 🟠 hoch | ✅ | `ClockManager`, `WifiDriver`, `NTP_SERVER`, `DomainEvent::WifiConnected` |
 | INFRA-T17 | Fallback wenn NTP nicht erreichbar: Timestamp aus NVS laden (letzter bekannter Wert) | 🟢 niedrig | ⬜ | `ClockManager`, `NvsDriver`, `NvsError` |
 
 ---
