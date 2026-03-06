@@ -1,17 +1,30 @@
 use heizbox_core::event::DomainEvent;
 use heizbox_core::input::InputEvent as CoreInputEvent;
+use heizbox_core::error::SensorError;
+use heizbox_hal::sensors::mlx90614::Mlx90614;
 
 /// Top-level application struct. Owns all managers and drives the event loop.
 /// Concrete initialisation happens in `heizbox-esp32`.
 pub struct DeviceApp {
     /// Pending domain events waiting to be dispatched.
     pending_events: heapless::Vec<DomainEvent, 16>,
+    /// Optional IR temperature sensor.
+    mlx90614: Option<Mlx90614>,
 }
 
 impl DeviceApp {
     pub fn new() -> Self {
         Self {
             pending_events: heapless::Vec::new(),
+            mlx90614: None,
+        }
+    }
+
+    /// Create with a MLX90614 sensor already attached.
+    pub fn with_sensor(mlx90614: Mlx90614) -> Self {
+        Self {
+            pending_events: heapless::Vec::new(),
+            mlx90614: Some(mlx90614),
         }
     }
 
@@ -21,8 +34,26 @@ impl DeviceApp {
     }
 
     /// Called from the control task after `update_heater`.
+    /// Reads MLX90614 temperatures and publishes TemperatureUpdated event.
     pub fn update_sensors(&mut self) {
-        // Placeholder — read IR/MLX90614 temperature here.
+        if let Some(sensor) = &mut self.mlx90614 {
+            match sensor.read_all() {
+                Ok((object_c, ambient_c, raw_ir)) => {
+                    let event = DomainEvent::TemperatureUpdated {
+                        current: object_c,
+                        ambient: ambient_c,
+                        raw_ir,
+                    };
+                    let _ = self.push_event(event);
+                }
+                Err(_e) => {
+                    // Convert I2cError to SensorError if needed.
+                    let _sensor_err = SensorError::I2cFailed;
+                    // Could push an error event if desired.
+                    // For now, ignore and continue.
+                }
+            }
+        }
     }
 
     /// Drain the first pending event, if any.

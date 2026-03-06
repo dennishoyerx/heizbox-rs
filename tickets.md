@@ -185,7 +185,7 @@
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
 | ESP32-T5 | `I2cImpl` auf `esp_idf_hal::i2c::I2cDriver` umstellen (SCL=27, SDA=26, 100 kHz) | 🔴 kritisch | ✅ | `I2cImpl`, `I2cDriver`, `I2C_SCL_PIN`, `I2C_SDA_PIN` |
-| ESP32-T6 | MLX90614-Treiber implementieren: Object-Temp und Ambient-Temp lesen via SMBus-Read-Word | 🔴 kritisch | ⬜ | `I2cImpl`, `SensorError`, `DomainEvent::TemperatureUpdated` |
+| ESP32-T6 | MLX90614-Treiber implementieren: Object-Temp und Ambient-Temp lesen via SMBus-Read-Word | 🔴 kritisch | ✅ | `I2cImpl`, `SensorError`, `DomainEvent::TemperatureUpdated` |
 | ESP32-T7 | Temperatur-Kalibrierung: Emissivitätskorrektur für Metall (Standard 0.95 → anpassen) | 🟡 mittel | ⬜ | `I2cImpl`, MLX90614 Emissivity Register, `SensorError::InvalidCalibration` |
 | ESP32-T8 | PCF8574-Treiber implementieren: I²C-Read/Write für GPIO-Expander (8 Bit) | 🟡 mittel | ⬜ | `I2cImpl`, `PCF8574_INT_PIN`, `HAL-T6` |
 

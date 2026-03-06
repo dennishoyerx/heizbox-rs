@@ -1,13 +1,13 @@
 use esp_idf_svc::sys::link_patches;
 use log::{info, warn};
-use std::{thread, time::Duration};
+use std::{sync::{Arc, Mutex}, thread, time::Duration};
 
 mod config;
 mod error;
 mod hal_impl;
 
 use heizbox_app::device::DeviceApp;
-use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver};
+use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver, sensors::mlx90614::Mlx90614};
 use heizbox_infra::clock::ClockManager;
 use esp_idf_hal::peripherals::Peripherals;
 
@@ -27,43 +27,48 @@ fn main() -> anyhow::Result<()> {
 
     // ── Initialise HAL drivers ─────────────────────────────────────────────
     let gpio = hal_impl::GpioImpl::new()?;
-    // I2C: SDA=GPIO26, SCL=GPIO27
-    let i2c = hal_impl::I2cImpl::new(i2c0, sda, scl)?;
-    // SPI: currently stub
+    let i2c_impl = hal_impl::I2cImpl::new(i2c0, sda, scl)?;
+    let i2c: Box<dyn I2cDriver + Send> = Box::new(i2c_impl);
     let spi = hal_impl::SpiImpl::new();
     let wifi = hal_impl::WifiImpl::new();
     let adc = hal_impl::AdcImpl::new();
-    // NVS: may need adjustment later; stub for now
     let nvs = hal_impl::NvsImpl::new()?;
 
+    // ── Initialise sensors ───────────────────────────────────────────────
+    let mlx90614 = Mlx90614::new(i2c, 0x5A);
+
     // ── Application ───────────────────────────────────────────────────────
-    let app = DeviceApp::new();
+    let app = Arc::new(Mutex::new(DeviceApp::with_sensor(mlx90614)));
 
     info!("All drivers initialised — spawning tasks");
 
     // ── Spawn FreeRTOS tasks ──────────────────────────────────────────────
+    let app_control = Arc::clone(&app);
     thread::Builder::new()
         .name("control".into())
         .stack_size(8 * 1024)
-        .spawn(control_task)
+        .spawn(move || control_task(app_control))
         .unwrap();
 
+    let app_network = Arc::clone(&app);
     thread::Builder::new()
         .name("network".into())
         .stack_size(8 * 1024)
-        .spawn(network_task)
+        .spawn(move || network_task(app_network))
         .unwrap();
 
+    let app_ui = Arc::clone(&app);
     thread::Builder::new()
         .name("ui".into())
         .stack_size(8 * 1024)
-        .spawn(ui_task)
+        .spawn(move || ui_task(app_ui))
         .unwrap();
 
+    let app_input = Arc::clone(&app);
     thread::Builder::new()
         .name("input".into())
         .stack_size(4 * 1024)
-        .spawn(input_task)
+        .spawn(move || input_task(app_input))
         .unwrap();
 
     // Main thread just keeps the watchdog happy.
@@ -75,15 +80,19 @@ fn main() -> anyhow::Result<()> {
 
 // ── Task bodies ───────────────────────────────────────────────────────────────
 
-fn control_task() {
+fn control_task(app: Arc<Mutex<DeviceApp>>) {
     info!("[control] task started");
     loop {
-        // TODO: tick HeaterSm, read sensors, push DomainEvents
+        let mut app_guard = app.lock().unwrap();
+        app_guard.update_heater();
+        app_guard.update_sensors();
+        // In a full implementation, we would also pop events and dispatch them.
+        drop(app_guard);
         thread::sleep(Duration::from_millis(100));
     }
 }
 
-fn network_task() {
+fn network_task(app: Arc<Mutex<DeviceApp>>) {
     info!("[network] task started");
 
     // Initialize WiFi driver and ClockManager
@@ -132,18 +141,22 @@ fn network_task() {
     }
 }
 
-fn ui_task() {
+fn ui_task(app: Arc<Mutex<DeviceApp>>) {
     info!("[ui] task started");
     loop {
-        // TODO: render active Screen to TFT
+        let mut app_guard = app.lock().unwrap();
+        app_guard.render();
+        drop(app_guard);
         thread::sleep(Duration::from_millis(50));
     }
 }
 
-fn input_task() {
+fn input_task(app: Arc<Mutex<DeviceApp>>) {
     info!("[input] task started");
     loop {
-        // TODO: poll GPIO joystick, dispatch InputEvents
+        let mut app_guard = app.lock().unwrap();
+        // Placeholder: read input events and call app_guard.handle_input(event)
+        drop(app_guard);
         thread::sleep(Duration::from_millis(20));
     }
 }

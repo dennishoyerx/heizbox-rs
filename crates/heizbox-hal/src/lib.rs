@@ -6,6 +6,7 @@ pub mod pins;
 pub mod spi;
 pub mod timer;
 pub mod wifi;
+pub mod sensors;
 
 // Flat re-exports so callers can write `heizbox_hal::GpioDriver`.
 pub use adc::{AdcDriver, AdcError};
@@ -15,3 +16,4 @@ pub use nvs::{NvsDriver, NvsError};
 pub use spi::{SpiDriver, SpiError};
 pub use timer::{TimerDriver, TimerError};
 pub use wifi::{WifiDriver, WifiError, IpAddr};
+pub use sensors::mlx90614::Mlx90614;
