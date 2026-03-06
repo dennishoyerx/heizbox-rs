@@ -5,11 +5,13 @@ use std::{sync::{Arc, Mutex}, thread, time::Duration};
 mod config;
 mod error;
 mod hal_impl;
+mod display_manager;
 
 use heizbox_app::device::DeviceApp;
 use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver, sensors::mlx90614::Mlx90614};
 use heizbox_infra::clock::ClockManager;
 use esp_idf_hal::peripherals::Peripherals;
+use crate::display_manager::DisplayManager;
 
 fn main() -> anyhow::Result<()> {
     // Required by esp-idf-svc.
@@ -25,14 +27,29 @@ fn main() -> anyhow::Result<()> {
     let sda = peripherals.pins.gpio26;
     let scl = peripherals.pins.gpio27;
 
+    // SPI2 pins for display (HSPI)
+    let spi2 = peripherals.spi2;
+    let spi_sck = peripherals.pins.gpio14;
+    let spi_mosi = peripherals.pins.gpio12;
+
     // ── Initialise HAL drivers ─────────────────────────────────────────────
     let gpio = hal_impl::GpioImpl::new()?;
     let i2c_impl = hal_impl::I2cImpl::new(i2c0, sda, scl)?;
     let i2c: Box<dyn I2cDriver + Send> = Box::new(i2c_impl);
-    let spi = hal_impl::SpiImpl::new();
+    let spi_impl = hal_impl::SpiImpl::new(spi2, spi_sck, spi_mosi)?;
+    let spi: Box<dyn SpiDriver + Send> = Box::new(spi_impl);
     let wifi = hal_impl::WifiImpl::new();
     let adc = hal_impl::AdcImpl::new();
     let nvs = hal_impl::NvsImpl::new()?;
+
+    // ── Initialise display ────────────────────────────────────────────────
+    let gpio_driver: Box<dyn GpioDriver + Send> = Box::new(gpio);
+    let mut display_manager = DisplayManager::new(spi, gpio_driver, 240, 280);
+    if let Err(e) = display_manager.init() {
+        eprintln!("Display init failed: {:?}", e);
+    } else {
+        info!("Display initialized");
+    }
 
     // ── Initialise sensors ───────────────────────────────────────────────
     let mlx90614 = Mlx90614::new(i2c, 0x5A);

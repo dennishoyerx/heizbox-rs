@@ -195,8 +195,8 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| ESP32-T9 | `SpiImpl` auf `esp_idf_hal::spi::SpiDeviceDriver` umstellen (SPI2/HSPI, 40 MHz) | 🔴 kritisch | ⬜ | `SpiImpl`, `SpiDriver`, `DISPLAY_*_PIN` |
-| ESP32-T10 | ST7789-Initialisierungssequenz implementieren: Reset-Puls, Kommandos (COLMOD, MADCTL, CASET, RASET, INVON, DISPON) | 🔴 kritisch | ⬜ | `SpiImpl`, `DisplayManager`, `DISPLAY_DC_PIN`, `DISPLAY_RST_PIN` |
+| ESP32-T9 | `SpiImpl` auf `esp_idf_hal::spi::SpiDeviceDriver` umstellen (SPI2/HSPI, 40 MHz) | 🔴 kritisch | ✅ | `SpiImpl`, `SpiDriver`, `DISPLAY_*_PIN` |
+| ESP32-T10 | ST7789-Initialisierungssequenz implementieren: Reset-Puls, Kommandos (COLMOD, MADCTL, CASET, RASET, INVON, DISPON) | 🔴 kritisch | ✅ | `SpiImpl`, `DisplayManager`, `DISPLAY_DC_PIN`, `DISPLAY_RST_PIN` |
 | ESP32-T11 | `FrameBuffer`-Flush via DMA-SPI implementieren für flüssiges Rendering (~20 fps) | 🟠 hoch | ⬜ | `SpiImpl`, `FrameBuffer`, `DisplayManager` |
 | ESP32-T12 | Backlight-PWM für Helligkeitssteuerung (GPIO 16) einrichten | 🟢 niedrig | ⬜ | `GpioImpl`, `DISPLAY_BL_PIN`, `DisplayManager` |
 

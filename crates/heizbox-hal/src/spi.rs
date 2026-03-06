@@ -10,7 +10,7 @@ pub enum SpiError {
     Timeout,
 }
 
-pub trait SpiDriver: Send + Sync {
+pub trait SpiDriver: Send {
     fn write(&mut self, data: &[u8]) -> Result<(), SpiError>;
     fn read(&mut self, buffer: &mut [u8]) -> Result<(), SpiError>;
     fn transfer(&mut self, write: &[u8], read: &mut [u8]) -> Result<(), SpiError>;

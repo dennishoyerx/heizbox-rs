@@ -2,6 +2,7 @@ use heizbox_core::event::DomainEvent;
 use heizbox_core::input::InputEvent as CoreInputEvent;
 use heizbox_core::error::SensorError;
 use heizbox_hal::sensors::mlx90614::Mlx90614;
+use crate::screen::FrameBuffer;
 
 /// Top-level application struct. Owns all managers and drives the event loop.
 /// Concrete initialisation happens in `heizbox-esp32`.
@@ -76,8 +77,12 @@ impl DeviceApp {
     }
 
     /// Render the active screen to the display.
-    pub fn render(&mut self) {
-        // Placeholder — call active Screen::render().
+    /// Returns the framebuffer that was produced.
+    /// Currently returns a black screen (placeholder).
+    pub fn render(&mut self) -> FrameBuffer {
+        // Placeholder — in the future, this will render the active screen.
+        // For now, create a black framebuffer (all zeros).
+        FrameBuffer::new(240, 280)
     }
 }
 

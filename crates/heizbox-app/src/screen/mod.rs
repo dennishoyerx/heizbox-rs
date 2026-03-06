@@ -18,12 +18,20 @@ pub struct FrameBuffer {
 }
 
 impl FrameBuffer {
+    /// Create a new framebuffer with the given dimensions.
+    /// The buffer is allocated to full size (width * height * 2) and initialized to zeros.
     pub fn new(width: u16, height: u16) -> Self {
-        Self {
-            data: heapless::Vec::new(),
-            width,
-            height,
-        }
+        let size = (width as usize) * (height as usize) * 2;
+        let mut data = heapless::Vec::new();
+        // Pre-allocate full capacity (which is exactly 134400 for 240x280).
+        // Resize will fill with zeros.
+        let _ = data.resize(size, 0);
+        Self { data, width, height }
+    }
+
+    /// Create a new framebuffer with existing data (e.g., for testing).
+    pub fn from_data(width: u16, height: u16, data: heapless::Vec<u8, 134400>) -> Self {
+        Self { data, width, height }
     }
 }
 

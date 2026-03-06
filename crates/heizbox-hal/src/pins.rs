@@ -5,11 +5,12 @@
 #![allow(dead_code)]
 
 pub mod display {
-    pub const MOSI: u8 = 23;
-    pub const SCK: u8 = 18;
-    pub const CS: u8 = 5;
-    pub const DC: u8 = 4;
-    pub const RST: u8 = 15;
+    // Using SPI2 (HSPI) pins: SCK=14, MOSI=12. MISO not used.
+    pub const MOSI: u8 = 12;
+    pub const SCK: u8 = 14;
+    pub const CS: u8 = 5;   // Chip-select handled via GPIO (not hardware)
+    pub const DC: u8 = 4;   // Data/Command
+    pub const RST: u8 = 15; // Reset
     /// Backlight — no conflict.
     pub const BL: u8 = 16;
     pub const WIDTH: u16 = 240;
