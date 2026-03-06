@@ -173,7 +173,7 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| ESP32-T1 | `GpioImpl` von HashMap-Stub auf `esp_idf_hal::gpio::PinDriver` umstellen | 🔴 kritisch | ⬜ | `GpioImpl`, `GpioDriver`, `pins.rs` |
+| ESP32-T1 | `GpioImpl` von HashMap-Stub auf `esp_idf_hal::gpio::PinDriver` umstellen | 🔴 kritisch | ✅ | `GpioImpl`, `GpioDriver`, `pins.rs` |
 | ESP32-T2 | Input-Pins (Joystick, Feuer-Taste) mit Pull-Up konfigurieren | 🔴 kritisch | ⬜ | `GpioImpl`, `JOYSTICK_*_PIN`, `FIRE_BTN_PIN` |
 | ESP32-T3 | MOSFET-Gate (GPIO 32) als Push-Pull-Output konfigurieren; sicherstellen, dass beim Boot LOW gesetzt wird | 🔴 kritisch | ⬜ | `GpioImpl`, `MOSFET_PIN`, `HeaterController` |
 | ESP32-T4 | Interrupt-basiertes Input-Reading für Joystick implementieren (statt Polling) | 🟢 niedrig | ⬜ | `GpioImpl`, `InputHandler`, `GpioDriver` |
