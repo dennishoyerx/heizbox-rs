@@ -1,0 +1,12 @@
+[package]
+name = "heizbox-app"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+
+[dependencies]
+heizbox-core = { path = "../heizbox-core" }
+heizbox-hal  = { path = "../heizbox-hal" }
+thiserror    = { version = "1.0", default-features = false }
+heapless     = "0.8"
+async-trait  = "0.1"

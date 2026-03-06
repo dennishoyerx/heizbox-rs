@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "crates/heizbox-core",
+    "crates/heizbox-app",
+    "crates/heizbox-infra",
+    "crates/heizbox-hal",
+    "crates/heizbox-esp32",
+    "crates/heizbox-tests",
+]
+resolver = "2"
