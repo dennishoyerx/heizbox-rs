@@ -206,7 +206,7 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| ESP32-T13 | `NvsImpl` auf `esp_idf_svc::nvs::EspNvs` umstellen; alle `get_*/set_*`-Methoden mit echtem Flash-Zugriff implementieren | 🔴 kritisch | ⬜ | `NvsImpl`, `NvsDriver`, `NvsError` |
+| ESP32-T13 | `NvsImpl` auf `esp_idf_svc::nvs::EspNvs` umstellen; alle `get_*/set_*`-Methoden mit echtem Flash-Zugriff implementieren | 🔴 kritisch | ✅ | `NvsImpl`, `NvsDriver`, `NvsError` |
 | ESP32-T14 | NVS-Partition in `partitions.csv` prüfen und ggf. vergrößern (Standard 24 KB oft zu klein) | 🟠 hoch | ⬜ | `NvsImpl`, `partitions.csv` |
 
 ---
