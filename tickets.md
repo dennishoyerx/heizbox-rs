@@ -104,8 +104,8 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| APP-T12 | `DeviceApp::run_control_tick()`: Sensor lesen → `HeaterSm::update_temperature()` → `DomainEvent` erzeugen → `EventBus::publish()` | 🔴 kritisch | ⬜ | `DeviceApp`, `HeaterSm`, `DomainEvent`, `EventBus`, `I2cDriver` |
-| APP-T13 | `DeviceApp::run_ui_tick()`: `ScreenManager::render()` aufrufen → `FrameBuffer` via SPI flushen | 🔴 kritisch | ⬜ | `DeviceApp`, `ScreenManager`, `FrameBuffer`, `SpiDriver` |
+| APP-T12 | `DeviceApp::run_control_tick()`: Sensor lesen → `HeaterSm::update_temperature()` → `DomainEvent` erzeugen → `EventBus::publish()` | 🔴 kritisch | ✅ | `DeviceApp`, `HeaterSm`, `DomainEvent`, `EventBus`, `I2cDriver` |
+| APP-T13 | `DeviceApp::run_ui_tick()`: `ScreenManager::render()` aufrufen → `FrameBuffer` via SPI flushen | 🔴 kritisch | ✅ | `DeviceApp`, `ScreenManager`, `FrameBuffer`, `SpiDriver` |
 | APP-T14 | Screensaver-Timeout-Logik in `DeviceApp` integrieren: Idle-Timer auf jede `InputEvent`-Aktivität zurücksetzen | 🟡 mittel | ⬜ | `DeviceApp`, `ScreensaverScreen`, `NavigationFsm`, `TimerDriver` |
 
 ---

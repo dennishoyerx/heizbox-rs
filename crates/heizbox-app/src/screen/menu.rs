@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use heizbox_core::event::DomainEvent;
 use crate::{Button, InputEvent, ScreenType};
 use super::{FrameBuffer, Navigation, Screen, ScreenError};
@@ -19,15 +18,14 @@ impl Default for MenuScreen {
     }
 }
 
-#[async_trait]
 impl Screen for MenuScreen {
-    async fn on_enter(&mut self) {
+    fn on_enter(&mut self) {
         self.selected_index = 0;
     }
 
-    async fn on_exit(&mut self) {}
+    fn on_exit(&mut self) {}
 
-    async fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError> {
+    fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError> {
         match event.button {
             Button::Up => {
                 self.selected_index = self.selected_index.saturating_sub(1);
@@ -42,11 +40,11 @@ impl Screen for MenuScreen {
         }
     }
 
-    async fn update(&mut self, _event: DomainEvent) -> Result<(), ScreenError> {
+    fn update(&mut self, _event: DomainEvent) -> Result<(), ScreenError> {
         Ok(())
     }
 
-    async fn render(&self) -> Result<FrameBuffer, ScreenError> {
-        Ok(FrameBuffer::new(280, 240))
+    fn render(&self) -> Result<FrameBuffer, ScreenError> {
+        Ok(FrameBuffer::new(240, 280))
     }
 }

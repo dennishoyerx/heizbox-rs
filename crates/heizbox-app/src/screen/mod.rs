@@ -4,15 +4,14 @@ pub mod nav;
 pub mod startup;
 pub mod state;
 
-use async_trait::async_trait;
 use heizbox_core::event::DomainEvent;
 use crate::{Button, InputEvent, ScreenType};
 
 // ── Framebuffer ───────────────────────────────────────────────────────────────
 
-/// Raw 16-bit (RGB565) framebuffer for a 280×240 display.
+/// Raw 16-bit (RGB565) framebuffer for a 240×280 display.
 pub struct FrameBuffer {
-    pub data: heapless::Vec<u8, 134400>, // 280 * 240 * 2
+    pub data: heapless::Vec<u8, 134400>, // 240 * 280 * 2
     pub width: u16,
     pub height: u16,
 }
@@ -57,13 +56,12 @@ pub enum ScreenError {
 
 // ── Screen trait ──────────────────────────────────────────────────────────────
 
-#[async_trait]
 pub trait Screen: Send {
-    async fn on_enter(&mut self);
-    async fn on_exit(&mut self);
-    async fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError>;
-    async fn update(&mut self, event: DomainEvent) -> Result<(), ScreenError>;
-    async fn render(&self) -> Result<FrameBuffer, ScreenError>;
+    fn on_enter(&mut self);
+    fn on_exit(&mut self);
+    fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError>;
+    fn update(&mut self, event: DomainEvent) -> Result<(), ScreenError>;
+    fn render(&self) -> Result<FrameBuffer, ScreenError>;
 }
 
 // ── Color helper (RGB565) ─────────────────────────────────────────────────────

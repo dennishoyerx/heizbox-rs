@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use heizbox_core::event::DomainEvent;
 use crate::{Button, InputEvent, ScreenType};
 use super::{FrameBuffer, Navigation, Screen, ScreenError};
@@ -19,17 +18,16 @@ impl FireScreen {
     }
 }
 
-#[async_trait]
 impl Screen for FireScreen {
-    async fn on_enter(&mut self) {
+    fn on_enter(&mut self) {
         self.is_heating = false;
     }
 
-    async fn on_exit(&mut self) {
+    fn on_exit(&mut self) {
         self.is_heating = false;
     }
 
-    async fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError> {
+    fn handle_input(&mut self, event: InputEvent) -> Result<Navigation, ScreenError> {
         match event.button {
             Button::Fire => {
                 self.is_heating = !self.is_heating;
@@ -40,15 +38,15 @@ impl Screen for FireScreen {
         }
     }
 
-    async fn update(&mut self, event: DomainEvent) -> Result<(), ScreenError> {
+    fn update(&mut self, event: DomainEvent) -> Result<(), ScreenError> {
         if let DomainEvent::TemperatureUpdated { current, .. } = event {
             self.current_temp = current;
         }
         Ok(())
     }
 
-    async fn render(&self) -> Result<FrameBuffer, ScreenError> {
+    fn render(&self) -> Result<FrameBuffer, ScreenError> {
         // Real rendering would push pixels to the TFT via the display driver.
-        Ok(FrameBuffer::new(280, 240))
+        Ok(FrameBuffer::new(240, 280))
     }
 }
