@@ -30,4 +30,6 @@ pub trait WifiDriver: Send + Sync {
     fn get_ip(&self) -> Option<IpAddr>;
     /// Signal strength in dBm.
     fn get_signal_strength(&self) -> i8;
+    /// Returns the SSID of the currently connected network, if any.
+    fn ssid(&self) -> Option<&str>;
 }

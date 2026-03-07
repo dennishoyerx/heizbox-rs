@@ -12,3 +12,7 @@ pub const NTP_SERVER: &str = "pool.ntp.org";
 
 /// Heartbeat interval in milliseconds.
 pub const HEARTBEAT_INTERVAL_MS: u32 = 5_000;
+
+/// WiFi credentials (to be configured)
+pub const WIFI_SSID: &str = "";
+pub const WIFI_PASSWORD: &str = "";

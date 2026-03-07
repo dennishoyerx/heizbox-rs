@@ -805,6 +805,7 @@ dependencies = [
  "async-trait",
  "esp-idf-hal",
  "esp-idf-svc",
+ "heapless",
  "heizbox-app",
  "heizbox-core",
  "heizbox-hal",

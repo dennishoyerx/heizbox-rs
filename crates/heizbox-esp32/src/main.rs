@@ -8,9 +8,11 @@ mod hal_impl;
 mod display_manager;
 
 use heizbox_app::device::DeviceApp;
+use heizbox_core::event::DomainEvent;
 use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver, sensors::mlx90614::Mlx90614};
 use heizbox_infra::clock::ClockManager;
 use esp_idf_hal::peripherals::Peripherals;
+use esp_idf_svc::eventloop::EspSystemEventLoop;
 use crate::display_manager::DisplayManager;
 
 fn main() -> anyhow::Result<()> {
@@ -24,13 +26,18 @@ fn main() -> anyhow::Result<()> {
     let peripherals = Peripherals::take().map_err(|_| anyhow::anyhow!("Failed to take peripherals"))?;
     let i2c0 = peripherals.i2c0;
     // Extract the GPIO pins needed for I2C (moving them out of peripherals)
-    let sda = peripherals.pins.gpio26;
-    let scl = peripherals.pins.gpio27;
+    let pins = peripherals.pins;
+    let sda = pins.gpio26;
+    let scl = pins.gpio27;
 
     // SPI2 pins for display (HSPI)
     let spi2 = peripherals.spi2;
-    let spi_sck = peripherals.pins.gpio14;
-    let spi_mosi = peripherals.pins.gpio12;
+    let spi_sck = pins.gpio14;
+    let spi_mosi = pins.gpio12;
+
+    // WiFi peripherals
+    let modem = peripherals.modem;
+    let sysloop = esp_idf_svc::eventloop::EspSystemEventLoop::take()?;
 
     // ── Initialise HAL drivers ─────────────────────────────────────────────
     let gpio = hal_impl::GpioImpl::new()?;
@@ -38,9 +45,8 @@ fn main() -> anyhow::Result<()> {
     let i2c: Box<dyn I2cDriver + Send> = Box::new(i2c_impl);
     let spi_impl = hal_impl::SpiImpl::new(spi2, spi_sck, spi_mosi)?;
     let spi: Box<dyn SpiDriver + Send> = Box::new(spi_impl);
-    let wifi = hal_impl::WifiImpl::new();
+    let wifi = hal_impl::WifiImpl::new(modem, sysloop)?;
     let adc = hal_impl::AdcImpl::new();
-    let nvs = hal_impl::NvsImpl::new()?;
 
     // ── Initialise display ────────────────────────────────────────────────
     let gpio_driver: Box<dyn GpioDriver + Send> = Box::new(gpio);
@@ -71,7 +77,7 @@ fn main() -> anyhow::Result<()> {
     thread::Builder::new()
         .name("network".into())
         .stack_size(8 * 1024)
-        .spawn(move || network_task(app_network))
+        .spawn(move || network_task(app_network, wifi))
         .unwrap();
 
     let app_ui = Arc::clone(&app);
@@ -109,24 +115,28 @@ fn control_task(app: Arc<Mutex<DeviceApp>>) {
     }
 }
 
-fn network_task(app: Arc<Mutex<DeviceApp>>) {
+fn network_task(app: Arc<Mutex<DeviceApp>>, mut wifi: impl WifiDriver) {
     info!("[network] task started");
 
-    // Initialize WiFi driver and ClockManager
-    let mut wifi = hal_impl::WifiImpl::new();
     let mut clock = ClockManager::new();
-
-    // WiFi credentials (should be sourced from config or NVS in production)
-    let ssid = "your-ssid";
-    let password = "your-password";
 
     loop {
         if !wifi.is_connected() {
-            // Attempt to connect
             info!("Connecting to WiFi...");
-            match wifi.connect(ssid, password) {
+            match wifi.connect(config::WIFI_SSID, config::WIFI_PASSWORD) {
                 Ok(()) => {
                     info!("WiFi connected");
+                    // Publish WifiConnected event
+                    if let Some(ssid) = wifi.ssid() {
+                        let _ = app.lock().unwrap().push_event(DomainEvent::WifiConnected {
+                            ssid: ssid.to_string(),
+                        });
+                    } else {
+                        // Fallback, should not happen
+                        let _ = app.lock().unwrap().push_event(DomainEvent::WifiConnected {
+                            ssid: "unknown".to_string(),
+                        });
+                    }
                     // After successful connection, synchronize NTP clock
                     match clock.sync_ntp() {
                         Ok(()) => {

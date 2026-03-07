@@ -1,5 +1,5 @@
 use esp_idf_hal::spi::{
-    SpiDriver, SpiDeviceDriver, config::{DriverConfig, Config, Mode, MODE_0},
+    SpiDriver, SpiDeviceDriver, config::{DriverConfig, Config, Mode, MODE_0}, Dma,
 };
 use esp_idf_hal::gpio::{Gpio14, Gpio12, Gpio8, Gpio5};
 use esp_idf_hal::spi::SPI2;
@@ -34,7 +34,8 @@ impl SpiImpl {
         mosi: Gpio12,
     ) -> Result<Self, SpiError> {
         // First, create the low-level SPI bus driver.
-        let bus_config = DriverConfig::new(); // Default: DMA disabled
+        // Enable DMA for high-throughput display flushing (target ~20 fps).
+        let bus_config = DriverConfig::new().dma(Dma::Auto(4096));
         let bus = SpiDriver::new(spi, sclk, mosi, None::<Gpio8>, &bus_config)
             .map_err(|_| SpiError::BusError)?;
         // Leak the bus to get a 'static reference (no destructor needed for whole program)
