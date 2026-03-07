@@ -234,7 +234,7 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| ESP32-T20 | `control_task`: echten Tick-Loop mit `HeaterSm` und MLX90614-Abfrage alle ~220 ms implementieren | 🔴 kritisch | ⬜ | `DeviceApp`, `HeaterSm`, `I2cImpl`, `DomainEvent` |
+| ESP32-T20 | `control_task`: echten Tick-Loop mit `HeaterSm` und MLX90614-Abfrage alle ~220 ms implementieren | 🔴 kritisch | ✅ | `DeviceApp`, `HeaterSm`, `I2cImpl`, `DomainEvent` |
 | ESP32-T21 | `ui_task`: `FrameBuffer`-Render-Loop mit festem Takt (~20 fps, 50 ms) und SPI-Flush implementieren | 🔴 kritisch | ⬜ | `DeviceApp`, `FrameBuffer`, `SpiImpl` |
 | ESP32-T22 | `input_task`: GPIO-Polling-Loop (~50 ms) mit `InputHandler` und `EventBus`-Publish implementieren | 🔴 kritisch | ⬜ | `InputHandler`, `GpioImpl`, `EventBus`, `DomainEvent` |
 | ESP32-T23 | `network_task`: WLAN-Connect → NTP-Sync → WebSocket-Connect → Reconnect-Loop implementieren | 🔴 kritisch | ⬜ | `WifiImpl`, `ClockManager`, `WebSocketClient`, `DomainEvent` |

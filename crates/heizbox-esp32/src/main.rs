@@ -1,4 +1,5 @@
 use esp_idf_svc::sys::link_patches;
+use esp_idf_svc::sys;
 use log::{info, warn};
 use std::{sync::{Arc, Mutex}, thread, time::Duration};
 
@@ -112,10 +113,10 @@ fn main() -> anyhow::Result<()> {
 fn control_task(app: Arc<Mutex<DeviceApp>>) {
     info!("[control] task started");
     loop {
+        let now_ms = unsafe { sys::esp_timer_get_time() } / 1000;
+        let now_ms = now_ms as u32;
         let mut app_guard = app.lock().unwrap();
-        app_guard.update_heater();
-        app_guard.update_sensors();
-        // In a full implementation, we would also pop events and dispatch them.
+        app_guard.update_heater(now_ms);
         drop(app_guard);
         thread::sleep(Duration::from_millis(100));
     }
