@@ -215,8 +215,8 @@
 
 | ID | Aufgabe | Priorität | Status | Typen / Referenzen |
 |---|---|---|---|---|
-| ESP32-T15 | `WifiImpl` auf `esp_idf_svc::wifi::EspWifi` umstellen; SSID/Passwort aus NVS laden statt aus `credentials.h` | 🔴 kritisch | ⬜ | `WifiImpl`, `WifiDriver`, `NvsDriver`, `DomainEvent::WifiConnected` |
-| ESP32-T16 | Reconnect-Logik bei WLAN-Verbindungsverlust: `DomainEvent::WifiDisconnected` publishen, `ExponentialBackoff` nutzen | 🟠 hoch | ⬜ | `WifiImpl`, `WifiDriver`, `ExponentialBackoff`, `DomainEvent::WifiDisconnected` |
+| ESP32-T15 | `WifiImpl` auf `esp_idf_svc::wifi::EspWifi` umstellen; SSID/Passwort aus NVS laden statt aus `credentials.h` | 🔴 kritisch | ✅ | `WifiImpl`, `WifiDriver`, `NvsDriver`, `DomainEvent::WifiConnected` |
+| ESP32-T16 | Reconnect-Logik bei WLAN-Verbindungsverlust: `DomainEvent::WifiDisconnected` publishen, `ExponentialBackoff` nutzen | 🟠 hoch | ✅ | `WifiImpl`, `WifiDriver`, `ExponentialBackoff`, `DomainEvent::WifiDisconnected` |
 | ESP32-T17 | WLAN-Credentials beim ersten Start via Serial-Konsole oder provisorischem AP-Mode eingeben | 🟢 niedrig | ⬜ | `WifiImpl`, `NvsDriver` |
 
 ---

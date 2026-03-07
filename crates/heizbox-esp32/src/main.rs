@@ -11,6 +11,7 @@ use heizbox_app::device::DeviceApp;
 use heizbox_core::event::DomainEvent;
 use heizbox_hal::{GpioDriver, I2cDriver, NvsDriver, SpiDriver, WifiDriver, sensors::mlx90614::Mlx90614};
 use heizbox_infra::clock::ClockManager;
+use heizbox_infra::network::reconnect::ExponentialBackoff;
 use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use crate::display_manager::DisplayManager;
@@ -45,7 +46,11 @@ fn main() -> anyhow::Result<()> {
     let i2c: Box<dyn I2cDriver + Send> = Box::new(i2c_impl);
     let spi_impl = hal_impl::SpiImpl::new(spi2, spi_sck, spi_mosi)?;
     let spi: Box<dyn SpiDriver + Send> = Box::new(spi_impl);
-    let wifi = hal_impl::WifiImpl::new(modem, sysloop)?;
+    let nvs = Arc::new(
+        hal_impl::NvsImpl::new()
+            .map_err(|e| anyhow::anyhow!("NVS initialization failed: {:?}", e))?
+    );
+    let wifi = hal_impl::WifiImpl::new(modem, sysloop, Arc::clone(&nvs))?;
     let adc = hal_impl::AdcImpl::new();
 
     // ── Initialise display ────────────────────────────────────────────────
@@ -74,10 +79,11 @@ fn main() -> anyhow::Result<()> {
         .unwrap();
 
     let app_network = Arc::clone(&app);
+    let nvs_network = Arc::clone(&nvs);
     thread::Builder::new()
         .name("network".into())
         .stack_size(8 * 1024)
-        .spawn(move || network_task(app_network, wifi))
+        .spawn(move || network_task(app_network, wifi, nvs_network))
         .unwrap();
 
     let app_ui = Arc::clone(&app);
@@ -115,29 +121,67 @@ fn control_task(app: Arc<Mutex<DeviceApp>>) {
     }
 }
 
-fn network_task(app: Arc<Mutex<DeviceApp>>, mut wifi: impl WifiDriver) {
+fn network_task(
+    app: Arc<Mutex<DeviceApp>>,
+    mut wifi: impl WifiDriver,
+    nvs: Arc<hal_impl::NvsImpl>,
+) {
     info!("[network] task started");
 
     let mut clock = ClockManager::new();
+    let mut backoff = ExponentialBackoff::new_with(2000, 60000);
+    let mut failure_count = 0;
+    const MAX_RETRIES: u32 = 5;
 
     loop {
         if !wifi.is_connected() {
-            info!("Connecting to WiFi...");
-            match wifi.connect(config::WIFI_SSID, config::WIFI_PASSWORD) {
+            // Load credentials from NVS
+            let ssid = match nvs.get_str("wifi", "ssid") {
+                Ok(s) if !s.is_empty() => s,
+                Ok(_) => {
+                    warn!("WiFi SSID not configured in NVS. Waiting for credentials...");
+                    thread::sleep(Duration::from_secs(5));
+                    continue;
+                }
+                Err(_) => {
+                    warn!("WiFi SSID not found in NVS. Waiting for credentials...");
+                    thread::sleep(Duration::from_secs(5));
+                    continue;
+                }
+            };
+            let password = match nvs.get_str("wifi", "password") {
+                Ok(s) => s,
+                Ok(_) => {
+                    warn!("WiFi password not configured in NVS. Waiting for credentials...");
+                    thread::sleep(Duration::from_secs(5));
+                    continue;
+                }
+                Err(_) => {
+                    warn!("WiFi password not found in NVS. Waiting for credentials...");
+                    thread::sleep(Duration::from_secs(5));
+                    continue;
+                }
+            };
+
+            info!("Attempting WiFi connection to SSID: {}", ssid);
+            match wifi.connect(&ssid, &password) {
                 Ok(()) => {
                     info!("WiFi connected");
+                    failure_count = 0;
+                    backoff.reset();
+
                     // Publish WifiConnected event
-                    if let Some(ssid) = wifi.ssid() {
+                    if let Some(connected_ssid) = wifi.ssid() {
                         let _ = app.lock().unwrap().push_event(DomainEvent::WifiConnected {
-                            ssid: ssid.to_string(),
+                            ssid: connected_ssid.to_string(),
                         });
                     } else {
-                        // Fallback, should not happen
                         let _ = app.lock().unwrap().push_event(DomainEvent::WifiConnected {
-                            ssid: "unknown".to_string(),
+                            ssid: ssid.clone(),
                         });
                     }
-                    // After successful connection, synchronize NTP clock
+
+                    // Synchronize NTP clock
                     match clock.sync_ntp() {
                         Ok(()) => {
                             info!("NTP synchronized, current UTC time: {}", clock.now_unix());
@@ -149,10 +193,22 @@ fn network_task(app: Arc<Mutex<DeviceApp>>, mut wifi: impl WifiDriver) {
                 }
                 Err(e) => {
                     warn!("WiFi connection failed: {:?}", e);
+                    failure_count += 1;
+                    if failure_count >= MAX_RETRIES {
+                        warn!("Maximum reconnect retries reached, publishing WifiDisconnected");
+                        let _ = app.lock().unwrap().push_event(DomainEvent::WifiDisconnected {
+                            reason: 1, // Connection failure
+                        });
+                        backoff.reset();
+                        failure_count = 0;
+                    }
+                    let delay_ms = backoff.next_delay_ms();
+                    thread::sleep(Duration::from_millis(delay_ms as u64));
+                    continue; // Skip the default sleep at end of loop
                 }
             }
         } else {
-            // Already connected: if clock not synced, try again periodically
+            // Already connected: ensure NTP is synced periodically
             if !clock.is_synced() {
                 if let Err(e) = clock.sync_ntp() {
                     warn!("NTP retry failed: {}", e);
@@ -161,8 +217,6 @@ fn network_task(app: Arc<Mutex<DeviceApp>>, mut wifi: impl WifiDriver) {
                 }
             }
         }
-
-        // Additional network maintenance (WebSocket, heartbeats, OTA checks) would go here.
 
         thread::sleep(Duration::from_secs(1));
     }

@@ -7,7 +7,9 @@ use esp_idf_svc::wifi::ClientConfiguration;
 use std::time::{Instant, Duration};
 use std::thread;
 use std::sync::Mutex;
+use std::sync::Arc;
 use heapless;
+use super::nvs_impl::NvsImpl;
 
 /// ESP32 WiFi implementation using esp-idf-svc.
 /// Wraps EspWifi in Mutex to satisfy `Send + Sync` bounds of WifiDriver.
@@ -16,12 +18,14 @@ pub struct WifiImpl {
     connected: bool,
     ip: Option<IpAddr>,
     connected_ssid: Option<heapless::String<32>>,
+    _nvs: Arc<NvsImpl>,
 }
 
 impl WifiImpl {
     pub fn new(
         modem: Modem,
         sysloop: EspSystemEventLoop,
+        nvs: Arc<NvsImpl>,
     ) -> Result<Self, WifiError> {
         let wifi = EspWifi::new(modem, sysloop, None)
             .map_err(|_| WifiError::NotSupported)?;
@@ -30,7 +34,15 @@ impl WifiImpl {
             connected: false,
             ip: None,
             connected_ssid: None,
+            _nvs: nvs,
         })
+    }
+
+    /// Scan for available WiFi networks (stub for future implementation).
+    /// Returns an empty vector until properly implemented.
+    pub fn scan(&self) -> Result<Vec<heapless::String<32>>, WifiError> {
+        // TODO: Implement actual scanning using esp-idf WiFi APIs.
+        Ok(vec![])
     }
 }
 
