@@ -17,11 +17,8 @@ impl core::fmt::Display for NavError {
     }
 }
 
-<<<<<<< ours
-=======
 /// Validates screen transitions.  Invalid transitions return `NavError` rather
 /// than being silently ignored.
->>>>>>> theirs
 pub struct NavigationFsm {
     current: ScreenType,
     history: heapless::Vec<ScreenType, 8>,
@@ -53,21 +50,12 @@ impl NavigationFsm {
     }
 
     fn validate_transition(&self, from: ScreenType, to: ScreenType) -> Result<(), NavError> {
-<<<<<<< ours
-        let allowed = match from {
-            ScreenType::Startup => &[ScreenType::Fire][..],
-            ScreenType::Fire => &[ScreenType::Fire, ScreenType::Menu, ScreenType::Screensaver][..],
-            ScreenType::Menu => &[ScreenType::Fire][..],
-            ScreenType::Screensaver => &[ScreenType::Fire][..],
-            ScreenType::OtaUpdate => &[ScreenType::Fire][..],
-=======
         let allowed: &[ScreenType] = match from {
             ScreenType::Startup     => &[ScreenType::Fire],
             ScreenType::Fire        => &[ScreenType::Fire, ScreenType::Menu, ScreenType::Screensaver],
             ScreenType::Menu        => &[ScreenType::Fire],
             ScreenType::Screensaver => &[ScreenType::Fire],
             ScreenType::OtaUpdate   => &[ScreenType::Fire],
->>>>>>> theirs
         };
         if allowed.contains(&to) {
             Ok(())
@@ -78,11 +66,5 @@ impl NavigationFsm {
 }
 
 impl Default for NavigationFsm {
-<<<<<<< ours
-    fn default() -> Self {
-        Self::new()
-    }
-=======
     fn default() -> Self { Self::new() }
->>>>>>> theirs
 }

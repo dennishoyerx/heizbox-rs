@@ -1,25 +1,4 @@
 [package]
-<<<<<<< ours
-name = "heizbox-esp32"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.80"
-
-[dependencies]
-heizbox-core  = { path = "../heizbox-core" }
-heizbox-app   = { path = "../heizbox-app" }
-heizbox-infra = { path = "../heizbox-infra" }
-heizbox-hal   = { path = "../heizbox-hal" }
-
-esp-idf-hal = { version = "0.45", features = ["native"] }
-esp-idf-svc = "0.51"
-
-log         = "0.4"
-static_cell = "1.0"
-async-trait = "0.1"
-anyhow      = "1.0"
-heapless    = "0.8"
-=======
 name    = "heizbox-esp32"
 version = "0.1.0"
 edition = "2021"
@@ -44,4 +23,3 @@ embedded-hal = "1"
 
 [build-dependencies]
 embuild = "0.31"
->>>>>>> theirs

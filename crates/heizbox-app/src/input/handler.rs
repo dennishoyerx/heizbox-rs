@@ -1,12 +1,9 @@
 use crate::{Button, InputEvent, InputEventType};
 use thiserror::Error;
 
-<<<<<<< ours
-=======
 /// Long-press threshold in milliseconds.
 const LONG_PRESS_MS: u32 = 300;
 
->>>>>>> theirs
 #[derive(Debug, Error)]
 pub enum InputError {
     #[error("Unknown input error")]
@@ -23,13 +20,6 @@ enum HandlerState {
 #[derive(Clone, Copy, Default)]
 struct ButtonState {
     pressed_at: u32,
-<<<<<<< ours
-    is_pressed: bool,
-}
-
-pub struct InputHandler {
-    state: HandlerState,
-=======
     is_pressed:  bool,
 }
 
@@ -38,7 +28,6 @@ pub struct InputHandler {
 /// [`InputEventType::Release`] events.
 pub struct InputHandler {
     state:         HandlerState,
->>>>>>> theirs
     button_states: [ButtonState; 6],
     last_input_ms: u32,
 }
@@ -46,22 +35,12 @@ pub struct InputHandler {
 impl InputHandler {
     pub fn new() -> Self {
         Self {
-<<<<<<< ours
-            state: HandlerState::Normal,
-=======
             state:         HandlerState::Normal,
->>>>>>> theirs
             button_states: [ButtonState::default(); 6],
             last_input_ms: 0,
         }
     }
 
-<<<<<<< ours
-    pub fn handle_input(
-        &mut self,
-        button: Button,
-        now_ms: u32,
-=======
     /// Feed a raw GPIO level change.
     ///
     /// * `button`     – which button changed.
@@ -71,32 +50,20 @@ impl InputHandler {
         &mut self,
         button:     Button,
         now_ms:     u32,
->>>>>>> theirs
         is_pressed: bool,
     ) -> Result<Option<InputEvent>, InputError> {
         self.last_input_ms = now_ms;
         match self.state {
-<<<<<<< ours
-            HandlerState::Normal => self.handle_normal(button, now_ms, is_pressed),
-            HandlerState::LongPressActive => self.handle_longpress(button, is_pressed),
-            HandlerState::MenuMode => self.handle_menu(button, is_pressed),
-=======
             HandlerState::Normal        => self.handle_normal(button, now_ms, is_pressed),
             HandlerState::LongPressActive => self.handle_longpress(button, is_pressed),
             HandlerState::MenuMode      => self.handle_menu(button, is_pressed),
->>>>>>> theirs
         }
     }
 
     fn handle_normal(
         &mut self,
-<<<<<<< ours
-        button: Button,
-        now_ms: u32,
-=======
         button:     Button,
         now_ms:     u32,
->>>>>>> theirs
         is_pressed: bool,
     ) -> Result<Option<InputEvent>, InputError> {
         let idx = button as usize;
@@ -107,11 +74,7 @@ impl InputHandler {
         } else {
             let hold_ms = now_ms.saturating_sub(self.button_states[idx].pressed_at);
             self.button_states[idx].is_pressed = false;
-<<<<<<< ours
-            if hold_ms > 300 {
-=======
             if hold_ms > LONG_PRESS_MS {
->>>>>>> theirs
                 self.state = HandlerState::LongPressActive;
                 Ok(Some(InputEvent { button, event_type: InputEventType::LongPress }))
             } else {
@@ -122,11 +85,7 @@ impl InputHandler {
 
     fn handle_longpress(
         &mut self,
-<<<<<<< ours
-        button: Button,
-=======
         button:     Button,
->>>>>>> theirs
         is_pressed: bool,
     ) -> Result<Option<InputEvent>, InputError> {
         if !is_pressed {
@@ -139,11 +98,7 @@ impl InputHandler {
 
     fn handle_menu(
         &mut self,
-<<<<<<< ours
-        button: Button,
-=======
         button:     Button,
->>>>>>> theirs
         is_pressed: bool,
     ) -> Result<Option<InputEvent>, InputError> {
         if !is_pressed {
@@ -161,14 +116,11 @@ impl InputHandler {
         }
     }
 
-<<<<<<< ours
-=======
     /// Enter menu-navigation mode (Up/Down emit Press; Left/Right exits).
     pub fn enter_menu_mode(&mut self) {
         self.state = HandlerState::MenuMode;
     }
 
->>>>>>> theirs
     pub fn last_input_ms(&self) -> u32 {
         self.last_input_ms
     }

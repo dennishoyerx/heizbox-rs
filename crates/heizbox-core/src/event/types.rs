@@ -1,11 +1,8 @@
 use serde::{Deserialize, Serialize};
 use crate::heater::CycleResult;
 
-<<<<<<< ours
-=======
 /// All domain events serialise with a `type` discriminant in `camelCase`
 /// so they map directly to the WebSocket protocol (CORE-T9).
->>>>>>> theirs
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum DomainEvent {
@@ -33,17 +30,12 @@ pub enum DomainEvent {
         ssid: String,
     },
     WifiDisconnected {
-<<<<<<< ours
-=======
         /// ESP-IDF disconnect reason code.
->>>>>>> theirs
         reason: u8,
     },
     WebSocketConnected,
     WebSocketDisconnected,
 
-<<<<<<< ours
-=======
     // ── Session (CORE-T7) ────────────────────────────────────────────────────
     /// Mirrors the WebSocket `sessionUpdate` message sent by the device.
     /// `clicks`        – number of heat-button presses this session.
@@ -55,7 +47,6 @@ pub enum DomainEvent {
         session_start: u32,
     },
 
->>>>>>> theirs
     // ── Persistence ─────────────────────────────────────────────────────────
     SettingsPersisted {
         key: &'static str,
@@ -70,10 +61,6 @@ pub enum DomainEvent {
     OtaFailed {
         reason: &'static str,
     },
-<<<<<<< ours
-}
-
-=======
 
     // ── Internal ────────────────────────────────────────────────────────────
     /// Emitted each time a heartbeat packet is dispatched (CORE-T8).
@@ -94,7 +81,6 @@ pub enum DomainEvent {
 
 /// Error sub-events emitted when the heater safety system triggers.
 /// Fields use `camelCase` in JSON (CORE-T9).
->>>>>>> theirs
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HeaterErrorEvent {

@@ -6,23 +6,13 @@ pub struct StartupScreen;
 
 impl Screen for StartupScreen {
     fn on_enter(&mut self) {}
-<<<<<<< ours
-    fn on_exit(&mut self) {}
-=======
     fn on_exit(&mut self)  {}
->>>>>>> theirs
 
     fn handle_input(&mut self, _event: InputEvent) -> Result<Navigation, ScreenError> {
         Ok(Navigation::GoTo(ScreenType::Fire))
     }
 
-<<<<<<< ours
-    fn update(&mut self, _event: DomainEvent) -> Result<(), ScreenError> {
-        Ok(())
-    }
-=======
     fn update(&mut self, _event: DomainEvent) -> Result<(), ScreenError> { Ok(()) }
->>>>>>> theirs
 
     fn render(&self) -> Result<FrameBuffer, ScreenError> {
         Ok(FrameBuffer::new(240, 280))
