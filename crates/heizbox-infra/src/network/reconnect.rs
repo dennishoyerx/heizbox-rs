@@ -1,3 +1,4 @@
+<<<<<<< ours
 /// Exponential back-off for connection retries.
 pub struct ExponentialBackoff {
     current_ms: u32,
@@ -41,3 +42,8 @@ impl Default for ExponentialBackoff {
         Self::new()
     }
 }
+=======
+//! Re-export from `heizbox-core` so existing callers in heizbox-infra
+//! and heizbox-esp32 that import from this path still compile.
+pub use heizbox_core::network::ExponentialBackoff;
+>>>>>>> theirs

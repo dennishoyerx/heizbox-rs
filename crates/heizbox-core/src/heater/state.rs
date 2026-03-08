@@ -6,11 +6,21 @@ pub struct Idle;
 
 pub struct Heating {
     pub cycle_started_at: u32,
+<<<<<<< ours
+=======
+    /// Battery voltage sampled at the moment heating started (V).
+    /// Populated by `start_heating_with_voltage`; `None` when ADC is unavailable.
+    pub voltage_start: Option<f32>,
+>>>>>>> theirs
 }
 
 pub struct Paused {
     pub cycle_started_at: u32,
     pub elapsed_ms: u32,
+<<<<<<< ours
+=======
+    pub voltage_start: Option<f32>,
+>>>>>>> theirs
 }
 
 // ── State machine ─────────────────────────────────────────────────────────────
@@ -38,8 +48,22 @@ impl HeaterSm<Idle> {
         }
     }
 
+<<<<<<< ours
     /// Idle → Heating
     pub fn start_heating(self, cycle_started_at: u32) -> Result<HeaterSm<Heating>, HeaterError> {
+=======
+    /// Idle → Heating (no voltage tracking).
+    pub fn start_heating(self, cycle_started_at: u32) -> Result<HeaterSm<Heating>, HeaterError> {
+        self.start_heating_with_voltage(cycle_started_at, None)
+    }
+
+    /// Idle → Heating, optionally capturing the battery voltage at start (CORE-T2).
+    pub fn start_heating_with_voltage(
+        self,
+        cycle_started_at: u32,
+        voltage_start: Option<f32>,
+    ) -> Result<HeaterSm<Heating>, HeaterError> {
+>>>>>>> theirs
         Ok(HeaterSm {
             power: self.power,
             target_temp: self.target_temp,
@@ -47,7 +71,11 @@ impl HeaterSm<Idle> {
             auto_stop_time_ms: self.auto_stop_time_ms,
             cycle_duration_ms: 0,
             ir_calibration: self.ir_calibration,
+<<<<<<< ours
             state: Heating { cycle_started_at },
+=======
+            state: Heating { cycle_started_at, voltage_start },
+>>>>>>> theirs
         })
     }
 }
@@ -88,11 +116,19 @@ impl HeaterSm<Heating> {
             state: Paused {
                 cycle_started_at: self.state.cycle_started_at,
                 elapsed_ms: self.cycle_duration_ms,
+<<<<<<< ours
+=======
+                voltage_start: self.state.voltage_start,
+>>>>>>> theirs
             },
         }
     }
 
     fn is_cutoff_exceeded(&self) -> bool {
+<<<<<<< ours
+=======
+        // CORE-T3: `target_temp == CUTOFF_DISABLED (420)` disables the check entirely.
+>>>>>>> theirs
         if self.target_temp == crate::config::CUTOFF_DISABLED {
             return false;
         }
@@ -117,16 +153,38 @@ impl HeaterSm<Paused> {
             ir_calibration: self.ir_calibration,
             state: Heating {
                 cycle_started_at: adjusted_start,
+<<<<<<< ours
+=======
+                voltage_start: self.state.voltage_start,
+>>>>>>> theirs
             },
         }
     }
 
     /// Paused → Idle, returns the finished cycle result.
+<<<<<<< ours
     pub fn finalize(self) -> (HeaterSm<Idle>, CycleResult) {
+=======
+    /// Pass `voltage_end` from ADC for full battery-tracking (CORE-T2).
+    pub fn finalize(self) -> (HeaterSm<Idle>, CycleResult) {
+        self.finalize_with_voltage(None)
+    }
+
+    /// Paused → Idle, with explicit end-voltage (CORE-T2).
+    pub fn finalize_with_voltage(
+        self,
+        voltage_end: Option<f32>,
+    ) -> (HeaterSm<Idle>, CycleResult) {
+>>>>>>> theirs
         let result = CycleResult {
             duration_ms: self.cycle_duration_ms,
             max_temp: self.current_temp,
             started_at: Some(self.state.cycle_started_at),
+<<<<<<< ours
+=======
+            voltage_start: self.state.voltage_start,  // CORE-T2
+            voltage_end,                               // CORE-T2
+>>>>>>> theirs
         };
         let idle = HeaterSm {
             power: self.power,
@@ -157,6 +215,10 @@ pub struct HeaterConfig {
 }
 
 impl HeaterConfig {
+<<<<<<< ours
+=======
+    /// Returns a `HeaterConfig` with device-validated default values (CORE-T1).
+>>>>>>> theirs
     pub fn with_defaults() -> Self {
         Self {
             power: crate::config::DEFAULT_POWER,
@@ -166,11 +228,27 @@ impl HeaterConfig {
     }
 }
 
+<<<<<<< ours
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct CycleResult {
     pub duration_ms: u32,
     pub max_temp: u16,
     pub started_at: Option<u32>,
+=======
+/// Result of a completed heating cycle — includes battery voltage data (CORE-T2).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct CycleResult {
+    /// Heating duration in milliseconds.
+    pub duration_ms: u32,
+    /// Highest measured temperature during this cycle (°C).
+    pub max_temp: u16,
+    /// Boot-relative timestamp when heating started (ms since boot).
+    pub started_at: Option<u32>,
+    /// Battery voltage when heating started (V).  `None` if ADC unavailable.
+    pub voltage_start: Option<f32>,
+    /// Battery voltage when heating ended (V).  `None` if ADC unavailable.
+    pub voltage_end: Option<f32>,
+>>>>>>> theirs
 }
 
 #[derive(Debug)]

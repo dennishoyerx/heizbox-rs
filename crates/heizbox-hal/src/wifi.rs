@@ -12,7 +12,11 @@ pub enum WifiError {
     AlreadyConnected,
 }
 
+<<<<<<< ours
 /// Minimal IP address representation (IPv4).
+=======
+/// Minimal IPv4 address (avoids pulling in `std::net`).
+>>>>>>> theirs
 #[derive(Debug, Clone, Copy)]
 pub struct IpAddr(pub [u8; 4]);
 
@@ -28,8 +32,14 @@ pub trait WifiDriver: Send + Sync {
     fn disconnect(&mut self) -> Result<(), WifiError>;
     fn is_connected(&self) -> bool;
     fn get_ip(&self) -> Option<IpAddr>;
+<<<<<<< ours
     /// Signal strength in dBm.
     fn get_signal_strength(&self) -> i8;
     /// Returns the SSID of the currently connected network, if any.
+=======
+    /// Signal strength in dBm (negative value).
+    fn get_signal_strength(&self) -> i8;
+    /// SSID of the currently connected network, if any.
+>>>>>>> theirs
     fn ssid(&self) -> Option<&str>;
 }

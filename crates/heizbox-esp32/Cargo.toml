@@ -1,4 +1,5 @@
 [package]
+<<<<<<< ours
 name = "heizbox-esp32"
 version = "0.1.0"
 edition = "2021"
@@ -18,3 +19,29 @@ static_cell = "1.0"
 async-trait = "0.1"
 anyhow      = "1.0"
 heapless    = "0.8"
+=======
+name    = "heizbox-esp32"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "heizbox-esp32"
+path = "src/main.rs"
+
+[dependencies]
+heizbox-core  = { path = "../heizbox-core"  }
+heizbox-hal   = { path = "../heizbox-hal"   }
+heizbox-app   = { path = "../heizbox-app"   }
+heizbox-infra = { path = "../heizbox-infra" }
+
+heapless    = { version = "0.8", default-features = false }
+log         = { version = "0.4" }
+
+esp-idf-hal = { version = "0.45", features = ["std", "embassy-sync", "critical-section"] }
+esp-idf-svc = { version = "0.51", features = ["std", "embassy-sync"] }
+esp-idf-sys = { version = "0.36", features = ["binstart"] }
+embedded-hal = "1"
+
+[build-dependencies]
+embuild = "0.31"
+>>>>>>> theirs

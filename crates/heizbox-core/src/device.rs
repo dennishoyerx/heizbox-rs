@@ -9,9 +9,14 @@ pub enum DeviceError {
     Other(String),
 }
 
+<<<<<<< ours
 /// Core device capability trait.
 #[async_trait]
 pub trait Device {
     /// Returns `Ok(())` when the device is operational.
+=======
+#[async_trait]
+pub trait Device {
+>>>>>>> theirs
     async fn status(&self) -> Result<(), DeviceError>;
 }

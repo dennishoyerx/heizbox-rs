@@ -17,7 +17,11 @@ pub enum ScreenType {
 
 #[derive(Debug, Clone)]
 pub struct InputEvent {
+<<<<<<< ours
     pub button: Button,
+=======
+    pub button:     Button,
+>>>>>>> theirs
     pub event_type: InputEventType,
 }
 

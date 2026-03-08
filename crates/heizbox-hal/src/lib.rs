@@ -3,12 +3,20 @@ pub mod gpio;
 pub mod i2c;
 pub mod nvs;
 pub mod pins;
+<<<<<<< ours
 pub mod spi;
 pub mod timer;
 pub mod wifi;
 pub mod sensors;
 
 // Flat re-exports so callers can write `heizbox_hal::GpioDriver`.
+=======
+pub mod sensors;
+pub mod spi;
+pub mod timer;
+pub mod wifi;
+
+>>>>>>> theirs
 pub use adc::{AdcDriver, AdcError};
 pub use gpio::{GpioDriver, GpioError};
 pub use i2c::{I2cDriver, I2cError};
