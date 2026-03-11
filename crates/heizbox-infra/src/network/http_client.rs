@@ -35,9 +35,6 @@ impl HttpClient {
 
             let cfg = Configuration {
                 use_global_ca_store: true,
-                crt_bundle_attach: Some(esp_idf_svc::tls::X509::pem_until_nul(
-                    heizbox_core::config::TLS_CA_BUNDLE,
-                )),
                 ..Default::default()
             };
             let mut client = EspHttpConnection::new(&cfg)

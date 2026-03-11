@@ -7,4 +7,5 @@ rust-version = "1.80"
 [dependencies]
 thiserror    = { version = "1.0", default-features = false }
 async-trait  = "0.1"
+heapless     = { version = "0.8", default-features = false }
 heizbox-core = { path = "../heizbox-core" }

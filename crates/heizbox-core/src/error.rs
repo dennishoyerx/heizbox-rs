@@ -201,11 +201,3 @@ impl From<NvsError> for PersistenceError {
         PersistenceError::NvsError
     }
 }
-
-/// Allow heizbox-hal::nvs::NvsError to convert into PersistenceError as well.
-/// This is used by infrastructure repositories (INFRA-T9, INFRA-T10).
-impl From<heizbox_hal::nvs::NvsError> for PersistenceError {
-    fn from(_: heizbox_hal::nvs::NvsError) -> Self {
-        PersistenceError::NvsError
-    }
-}

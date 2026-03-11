@@ -8,6 +8,8 @@
 use heizbox_core::event::DomainEvent;
 use heizbox_core::network::ExponentialBackoff;
 use heizbox_core::error::NetworkError;
+#[cfg(target_os = "espidf")]
+use serde_json;
 
 /// Connection state machine for the WebSocket session.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -54,7 +56,7 @@ impl WebSocketClient {
 
         #[cfg(target_os = "espidf")]
         {
-            use esp_idf_svc::ws::client::{EspWebSocketClient, EspWebSocketClientConfig};
+            use esp_idf_svc::ws::{EspWebSocketClient, EspWebSocketClientConfig};
             use std::time::Duration;
 
             let cfg = EspWebSocketClientConfig {
@@ -88,20 +90,18 @@ impl WebSocketClient {
             return Err(NetworkError::NotConnected);
         }
 
-        // serde_json::to_string would be ideal; on no_std we use a
-        // pre-allocated heapless buffer and a minimal serialiser.
-        #[cfg(feature = "std")]
-        let json = serde_json::to_string(event)
-            .map_err(|_| NetworkError::SerialiseError)?;
-
-        #[cfg(not(feature = "std"))]
-        let json = {
+        #[cfg(target_os = "espidf")]
+        {
+            let json = serde_json::to_string(event)
+                .map_err(|_| NetworkError::SerializationError)?;
+            self.transmit(json.as_bytes())
+        }
+        #[cfg(not(target_os = "espidf"))]
+        {
             let mut buf = heapless::String::<MAX_JSON_LEN>::new();
             event.write_json(&mut buf).map_err(|_| NetworkError::SerialiseError)?;
-            buf
-        };
-
-        self.transmit(json.as_bytes())
+            self.transmit(buf.as_bytes())
+        }
     }
 
     /// Deserialise a raw frame received from the server.

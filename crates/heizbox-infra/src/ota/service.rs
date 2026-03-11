@@ -5,6 +5,8 @@
 
 use heizbox_core::event::DomainEvent;
 use heizbox_core::error::NetworkError;
+#[cfg(target_os = "espidf")]
+use esp_idf_svc::sys::esp_restart;
 
 pub struct OtaService;
 
@@ -32,7 +34,7 @@ impl OtaService {
             let mut http = EspHttpConnection::new(&cfg)
                 .map_err(|_| NetworkError::HttpError(0))?;
             let mut ota  = EspOta::new().map_err(|_| NetworkError::OtaError)?;
-            let mut work  = ota.begin().map_err(|_| NetworkError::OtaError)?;
+            let mut work  = ota.initiate_update().map_err(|_| NetworkError::OtaError)?;
 
             // Stream firmware in chunks.
             let mut written: usize = 0;
@@ -61,14 +63,13 @@ impl OtaService {
     /// Restart the device after OTA.  On ESP-IDF calls `esp_restart()`.
     /// INFRA-T14 ✅
     pub fn restart(&self) {
-        #[cfg(target_os = "espidf")] 
-        unsafe { esp_idf_sys::esp_restart(); 
+        #[cfg(target_os = "espidf")]
+        unsafe { esp_restart(); }
         #[cfg(not(target_os = "espidf"))] {
             panic!("OtaService::restart() called in host context");
         }
-        }
-}
     }
+}
 
 impl Default for OtaService {
     fn default() -> Self { Self::new() }

@@ -68,9 +68,9 @@ impl<N: NvsDriver> ClockManager<N> {
     /// INFRA-T17: Load last persisted timestamp from NVS as fallback.
     pub fn load_fallback_ts(&mut self) -> Result<u64, ClockError> {
         let lo = self.nvs.get_u32(NS_CLK, "ts_lo")
-            .unwrap_or(None).unwrap_or(0) as u64;
+            .ok().flatten().unwrap_or(0) as u64;
         let hi = self.nvs.get_u32(NS_CLK, "ts_hi")
-            .unwrap_or(None).unwrap_or(0) as u64;
+            .ok().flatten().unwrap_or(0) as u64;
         let ts = (hi << 32) | lo;
         self.epoch_offset_ms = ts;
         Ok(ts)
@@ -78,8 +78,10 @@ impl<N: NvsDriver> ClockManager<N> {
 
     /// Persist timestamp to NVS (split u64 → two u32 keys).
     fn persist_ts(&mut self, ts: u64) -> Result<(), PersistenceError> {
-        self.nvs.set_u32(NS_CLK, "ts_lo", (ts & 0xFFFF_FFFF) as u32)?;
-        self.nvs.set_u32(NS_CLK, "ts_hi", (ts >> 32) as u32)?;
+        self.nvs.set_u32(NS_CLK, "ts_lo", (ts & 0xFFFF_FFFF) as u32)
+            .map_err(|_| PersistenceError::NvsError)?;
+        self.nvs.set_u32(NS_CLK, "ts_hi", (ts >> 32) as u32)
+            .map_err(|_| PersistenceError::NvsError)?;
         Ok(())
     }
 

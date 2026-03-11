@@ -43,32 +43,32 @@ impl<N: NvsDriver> HeaterConfigRepository<N> {
     fn get_u8(&mut self, key: &str) -> Result<Option<u8>, PersistenceError> {
         match self.nvs.get_u8(NS_CFG, key) {
             Ok(v) => Ok(v),
-            Err(NvsError::KeyNotFound(_)) => Ok(None),
-            Err(e) => Err(PersistenceError::from(e)),
+            Err(heizbox_hal::nvs::NvsError::KeyNotFound(_)) => Ok(None),
+            Err(_) => Err(PersistenceError::NvsError),
         }
     }
     fn get_u16(&mut self, key: &str) -> Result<Option<u16>, PersistenceError> {
         match self.nvs.get_u16(NS_CFG, key) {
             Ok(v) => Ok(v),
-            Err(NvsError::KeyNotFound(_)) => Ok(None),
-            Err(e) => Err(PersistenceError::from(e)),
+            Err(heizbox_hal::nvs::NvsError::KeyNotFound(_)) => Ok(None),
+            Err(_) => Err(PersistenceError::NvsError),
         }
     }
     fn get_u32(&mut self, key: &str) -> Result<Option<u32>, PersistenceError> {
         match self.nvs.get_u32(NS_CFG, key) {
             Ok(v) => Ok(v),
-            Err(NvsError::KeyNotFound(_)) => Ok(None),
-            Err(e) => Err(PersistenceError::from(e)),
+            Err(heizbox_hal::nvs::NvsError::KeyNotFound(_)) => Ok(None),
+            Err(_) => Err(PersistenceError::NvsError),
         }
     }
     fn set_u8(&mut self, key: &str, v: u8) -> Result<(), PersistenceError> {
-        self.nvs.set_u8(NS_CFG, key, v).map_err(Into::into)
+        self.nvs.set_u8(NS_CFG, key, v).map_err(|_| PersistenceError::NvsError)
     }
     fn set_u16(&mut self, key: &str, v: u16) -> Result<(), PersistenceError> {
-        self.nvs.set_u16(NS_CFG, key, v).map_err(Into::into)
+        self.nvs.set_u16(NS_CFG, key, v).map_err(|_| PersistenceError::NvsError)
     }
     fn set_u32(&mut self, key: &str, v: u32) -> Result<(), PersistenceError> {
-        self.nvs.set_u32(NS_CFG, key, v).map_err(Into::into)
+        self.nvs.set_u32(NS_CFG, key, v).map_err(|_| PersistenceError::NvsError)
     }
 }
 
@@ -106,8 +106,8 @@ impl<N: NvsDriver> HeaterSettingsRepository<N> {
         match self.nvs.get_blob(NS_SET, key.as_str()) {
             Ok(Some(b)) if b.len() >= 3 => Ok(Some(StoredPreset::from_bytes([b[0],b[1],b[2]]))),
             Ok(_) => Ok(None),
-            Err(NvsError::KeyNotFound(_)) => Ok(None),
-            Err(e) => Err(e.into()),
+            Err(heizbox_hal::nvs::NvsError::KeyNotFound(_)) => Ok(None),
+            Err(_) => Err(PersistenceError::NvsError),
         }
     }
 
@@ -117,18 +117,18 @@ impl<N: NvsDriver> HeaterSettingsRepository<N> {
         assert!(slot < PRESET_SLOTS);
         let key = preset_key(slot);
         let bytes = StoredPreset { preset, override_target: ot, override_power: op }.to_bytes();
-        self.nvs.set_blob(NS_SET, key.as_str(), &bytes).map_err(Into::into)
+        self.nvs.set_blob(NS_SET, key.as_str(), &bytes).map_err(|_| PersistenceError::NvsError)
     }
 
     fn get_u32(&mut self, key: &str) -> Result<Option<u32>, PersistenceError> {
         match self.nvs.get_u32(NS_SET, key) {
             Ok(v) => Ok(v),
-            Err(NvsError::KeyNotFound(_)) => Ok(None),
-            Err(e) => Err(e.into()),
+            Err(heizbox_hal::nvs::NvsError::KeyNotFound(_)) => Ok(None),
+            Err(_) => Err(PersistenceError::NvsError),
         }
     }
     fn set_u32(&mut self, key: &str, v: u32) -> Result<(), PersistenceError> {
-        self.nvs.set_u32(NS_SET, key, v).map_err(Into::into)
+        self.nvs.set_u32(NS_SET, key, v).map_err(|_| PersistenceError::NvsError)
     }
 }
 

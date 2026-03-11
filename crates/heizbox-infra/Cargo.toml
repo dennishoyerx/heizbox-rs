@@ -13,5 +13,5 @@ serde_json   = { version = "1.0", default-features = false, features = ["alloc"]
 async-trait  = "0.1"
 heapless    = { version = "0.8", default-features = false }
 log          = "0.4"
-esp-idf-hal  = { version = "0.45", features = ["native"] }
-esp-idf-svc  = "0.51"
+esp-idf-hal  = "0.31"
+esp-idf-svc  = "0.31"

@@ -6,7 +6,7 @@ use crate::screen::FrameBuffer;
 use heizbox_core::heater::{HeaterSm, HeaterConfig, HeaterError, Idle, Heating};
 use heizbox_core::consumption::ConsumptionData;
 use crate::event_bus::EventBus;
-use heizbox_core::event::HeaterErrorEvent;
+use heizbox_core::event::types::HeaterErrorEvent;
 
 /// Top-level application struct (APP-T12 / APP-T13).
 /// Owns all managers and drives the event loop.
